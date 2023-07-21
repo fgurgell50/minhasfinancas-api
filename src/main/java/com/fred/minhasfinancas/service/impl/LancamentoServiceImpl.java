@@ -3,9 +3,8 @@ package com.fred.minhasfinancas.service.impl;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
-import org.hibernate.type.TrueFalseConverter;
-import org.junit.platform.engine.support.hierarchical.DefaultParallelExecutionConfigurationStrategy;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.StringMatcher;
@@ -13,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import com.fred.minhasfinancas.model.entity.Lancamento;
 import com.fred.minhasfinancas.model.enums.StatusLancamento;
+import com.fred.minhasfinancas.model.enums.TipoLancamento;
 import com.fred.minhasfinancas.model.repository.LancamentoRepository;
-import com.fred.minhasfinancas.model.repository.UsuarioRepository;
 import com.fred.minhasfinancas.service.LancamentoService;
 import com.fred.minhasfinancas.service.exceptions.RegraNegocioException;
 
@@ -26,7 +25,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 	private LancamentoRepository repository;
 	
 	public LancamentoServiceImpl(LancamentoRepository repository) {
-		//super();
+		super();
 		this.repository = repository;
 	}	
 	
@@ -34,6 +33,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 	@Transactional
 	public Lancamento salvar(Lancamento lancamento) {
 		validar(lancamento);
+		lancamento.setStatus(StatusLancamento.PENDENTE);
 		return repository.save(lancamento);
 	}
 
@@ -41,6 +41,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 	@Transactional
 	public Lancamento atualizar(Lancamento lancamento) {
 		Objects.requireNonNull(lancamento.getId());
+		validar(lancamento);
 		return repository.save(lancamento);
 	}
 
@@ -49,19 +50,18 @@ public class LancamentoServiceImpl implements LancamentoService {
 	public void deletar(Lancamento lancamento) {
 		Objects.requireNonNull(lancamento.getId());
 		repository.delete(lancamento);
-		
 	}
 
 	@Override
+	//@org.springframework.transaction.annotation.Transactional (readOnly = true)
 	@Transactional
 	public List<Lancamento> buscar(Lancamento lancamentoFiltro) {
 		//Vai pega a instância do Objeto lancamentoFiltro com os dados preenchidos
 		// vai passar para o Objeto Example
 		Example example = Example.of( lancamentoFiltro, 
-				ExampleMatcher
-				.matching()
+				ExampleMatcher.matching()
 				.withIgnoreCase()
-				.withStringMatcher(StringMatcher.CONTAINING) );
+				.withStringMatcher( StringMatcher.CONTAINING) );
 		//CONTAINING busca comr parte do Lancamento que foi decrito na colsuta
 		//Exact busca pela decrição exata 
 		//Ending encontrar a descrição TERMINE com o Lancamento que foi decrito na colsuta
@@ -78,8 +78,6 @@ public class LancamentoServiceImpl implements LancamentoService {
 	@Override
 	@Transactional
 	public void validar(Lancamento lancamento) {
-		// TODO Auto-generated method stub
-		//boolean existe = repository.existsByEmail(email);
 		if(lancamento.getDescricao()==null || lancamento.getDescricao().trim().equals("") ) {
 			throw new RegraNegocioException("Informe uma Descrição Válida");
 		}
@@ -99,7 +97,30 @@ public class LancamentoServiceImpl implements LancamentoService {
 		if(lancamento.getTipo() == null ) {
 			throw new RegraNegocioException("Informe um Tipo de Lançamento");
 		}
-		
 	}
 
+	@Override
+	public Optional<Lancamento> obterPorId(Long id) {
+		// TODO Auto-generated method stub
+		return repository.findById(id);
+	}
+
+	@Override
+	@Transactional
+	public BigDecimal obterSaldoPorUsuario(Long idUsuario) {
+		BigDecimal receitas = repository
+				.obterSaldoPorTipoLancamentoEUsuario(idUsuario, TipoLancamento.RECEITA );
+		BigDecimal despesas = repository
+				.obterSaldoPorTipoLancamentoEUsuario(idUsuario, TipoLancamento.DESPESA );
+		
+		if(receitas == null) {
+			receitas = BigDecimal.ZERO;
+		}
+		
+		if(despesas == null) {
+			despesas = BigDecimal.ZERO;
+		}
+		
+		return receitas.subtract(despesas);
+	}
 }
