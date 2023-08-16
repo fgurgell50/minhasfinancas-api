@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fred.minhasfinancas.api.dto.UsuarioDTO;
@@ -53,14 +54,25 @@ public class UsuarioResource {
 	}
 	
 	@PostMapping
+	//@RequestMapping(value = "/**", method = RequestMethod.OPTIONS)
 	public ResponseEntity salvar( @RequestBody UsuarioDTO dto ) {
-		
-		Usuario usuario = Usuario.builder().name(dto.getNome()).email(dto.getEmail()).senha(dto.getSenha()).build();
+		System.out.println("UsuarioDTO: Email" + dto.getEmail() + "Nome:" + dto.getNome());
+		Usuario usuario = Usuario.builder()
+				.name(dto.getNome())
+				.email(dto.getEmail())
+				.senha(dto.getSenha())
+				.build();
 	
 		try {
 			Usuario usuarioSalvo = service.salvarUsuario(usuario);
-			return new ResponseEntity(usuarioSalvo, HttpStatus.CREATED);
+			System.out.println(ResponseEntity.ok(usuarioSalvo));
+			System.out.println(usuarioSalvo);
+			
+			//return new ResponseEntity(usuarioSalvo, HttpStatus.OK);
+			return ResponseEntity.ok(usuarioSalvo);
+			
 		}catch (RegraNegocioException e) {
+			System.out.println(e.getMessage());
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	

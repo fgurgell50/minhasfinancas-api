@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.repository.query.Param;
-
 import com.fred.minhasfinancas.model.entity.Lancamento;
 import com.fred.minhasfinancas.model.enums.StatusLancamento;
 
