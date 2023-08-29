@@ -69,7 +69,7 @@ public class LancamentoServiceImpl implements LancamentoService {
 	}
 
 	@Override
-	public void atializarStatus(Lancamento lancamento, StatusLancamento status) {
+	public void atualizarStatus(Lancamento lancamento, StatusLancamento status) {
 		lancamento.setStatus(status);
 		atualizar(lancamento);
 		
@@ -109,9 +109,9 @@ public class LancamentoServiceImpl implements LancamentoService {
 	@Transactional
 	public BigDecimal obterSaldoPorUsuario(Long idUsuario) {
 		BigDecimal receitas = repository
-				.obterSaldoPorTipoLancamentoEUsuario(idUsuario, TipoLancamento.RECEITA );
+				.obterSaldoPorTipoLancamentoEUsuarioEStatus(idUsuario, TipoLancamento.RECEITA, StatusLancamento.EFETIVADO );
 		BigDecimal despesas = repository
-				.obterSaldoPorTipoLancamentoEUsuario(idUsuario, TipoLancamento.DESPESA );
+				.obterSaldoPorTipoLancamentoEUsuarioEStatus(idUsuario, TipoLancamento.DESPESA, StatusLancamento.EFETIVADO );
 		
 		if(receitas == null) {
 			receitas = BigDecimal.ZERO;
