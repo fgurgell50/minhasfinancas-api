@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.ExampleMatcher.StringMatcher;
@@ -17,7 +19,7 @@ import com.fred.minhasfinancas.model.repository.LancamentoRepository;
 import com.fred.minhasfinancas.service.LancamentoService;
 import com.fred.minhasfinancas.service.exceptions.RegraNegocioException;
 
-import jakarta.transaction.Transactional;
+
 
 @Service
 public class LancamentoServiceImpl implements LancamentoService {

@@ -1,15 +1,15 @@
 package com.fred.minhasfinancas.model.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Table;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
+import javax.persistence.GenerationType;
+import javax.persistence.Column;
+import javax.persistence.Id;
 
 @Entity
 @Table( name = "usuario" , schema = "financas")

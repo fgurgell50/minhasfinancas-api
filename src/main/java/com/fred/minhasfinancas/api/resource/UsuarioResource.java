@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fred.minhasfinancas.api.dto.TokenDTO;
 import com.fred.minhasfinancas.api.dto.UsuarioDTO;
 import com.fred.minhasfinancas.model.entity.Usuario;
+import com.fred.minhasfinancas.service.JwtService;
 import com.fred.minhasfinancas.service.LancamentoService;
 import com.fred.minhasfinancas.service.UsuarioService;
 import com.fred.minhasfinancas.service.exceptions.RegraNegocioException;
@@ -42,12 +44,15 @@ public class UsuarioResource {
 	
 	private final UsuarioService service;
 	private final LancamentoService lancamentoService;
+	private final JwtService jwtService;
 	
 	@PostMapping("/autenticar")
-	public ResponseEntity autenticar( @RequestBody UsuarioDTO dto ) {
+	public ResponseEntity<?> autenticar( @RequestBody UsuarioDTO dto ) {
 		try {
 			Usuario usuarioAutenticado = service.autenticar(dto.getEmail(), dto.getSenha());
-			return  ResponseEntity.ok(usuarioAutenticado);
+			String token = jwtService.gerarToken(usuarioAutenticado);
+			TokenDTO tokenDTO = new TokenDTO(usuarioAutenticado.getName(),token);
+			return  ResponseEntity.ok(tokenDTO);
 		}catch (ErroAutenticacao e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}

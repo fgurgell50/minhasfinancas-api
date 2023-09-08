@@ -2,7 +2,9 @@ package com.fred.minhasfinancas.service.impl;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.transaction.Transactional;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fred.minhasfinancas.model.entity.Usuario;
@@ -11,16 +13,20 @@ import com.fred.minhasfinancas.service.UsuarioService;
 import com.fred.minhasfinancas.service.exceptions.ErroAutenticacao;
 import com.fred.minhasfinancas.service.exceptions.RegraNegocioException;
 
-import jakarta.transaction.Transactional;
+
 
 @Service
 public class UsuarioServiceimpl implements UsuarioService {
 	
 	private UsuarioRepository repository;
+	private PasswordEncoder encoder;
 	
-	public UsuarioServiceimpl(UsuarioRepository repository) {
+	public UsuarioServiceimpl(
+			UsuarioRepository repository, 
+			PasswordEncoder encoder) {
 		super();
 		this.repository = repository;
+		this.encoder = encoder;
 	}
 
 	@Override
@@ -31,7 +37,10 @@ public class UsuarioServiceimpl implements UsuarioService {
 			throw new ErroAutenticacao("Usuário Não Encontrado Para o Email Informado!");
 		}
 		
-		if(!usuario.get().getSenha().equals(senha)) {
+		boolean senhasBatem = encoder.matches( senha, usuario.get().getSenha());
+		//verifica a senha enviada com a senha criptografada do banco
+		
+		if( !senhasBatem ) {
 			throw new ErroAutenticacao("Senha Inválida!");
 		}
 	
@@ -40,10 +49,15 @@ public class UsuarioServiceimpl implements UsuarioService {
 
 	@Override
 	public Usuario salvarUsuario(Usuario usuario) {
-		
 		validarEmail(usuario.getEmail());
-		
+		criptografarSenha(usuario);
 		return repository.save(usuario);
+	}
+
+	private void criptografarSenha(Usuario usuario) {
+		String senha = usuario.getSenha();
+		String senhaCripto = encoder.encode(senha);
+		usuario.setSenha(senhaCripto);
 	}
 
 	@Override
